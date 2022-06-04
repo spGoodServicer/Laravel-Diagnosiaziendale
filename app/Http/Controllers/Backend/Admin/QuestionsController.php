@@ -11,11 +11,13 @@ use App\Models\Course;
 use function foo\func;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreQuestionsRequest;
 use App\Http\Requests\Admin\UpdateQuestionsRequest;
 use App\Http\Controllers\Traits\FileUploadTrait;
 use Yajra\DataTables\Facades\DataTables;
+
 use DB;
 use Validator;
 
@@ -129,7 +131,7 @@ class QuestionsController extends Controller
                 return '<input type="number" class="page_no" id="'.$q->id.'" value="'.$q->page_number.'" name="page_no[]">';
             })
             ->editColumn('questionimage', function ($q) {
-                return ($q->questionimage != null) ? '<img object-fit="fill" height="30px" width="40px" src="' . asset('uploads/image/' . $q->questionimage) . '">' : 'N/A';
+                return ($q->questionimage != null) ? '<img object-fit="fill" height="30px" width="40px" src="' . asset('public/uploads/image/' . $q->questionimage) . '">' : 'N/A';
             })
             ->rawColumns(['questionimage', 'actions','question','page_no'])
             ->make();
@@ -141,95 +143,85 @@ class QuestionsController extends Controller
             return abort(401);
         }
 
+        $courses =array();
         $course_list =DB::table('tests')            
-            ->join('courses', 'tests.course_id', '=', 'courses.id')
-            ->select('course_id','courses.title')
-            ->groupBy('course_id')->get();
-        $course_list= json_decode(json_encode($course_list),true);
-
-        $n_course_list = count($course_list);//add ckd
-        for ($i=0;$i<$n_course_list;$i++)
+        ->join('courses', 'tests.course_id', '=', 'courses.id')
+        ->select('course_id','courses.title')
+        ->groupBy('course_id')->get();
+        for ($x=0;$x <count($course_list);$x++)
         {
-            $temp =DB::table('tests')
+            $course=array();
+            $course['dataAttrs'][] = array('title'=>'type','data' =>'course');
+            $course['dataAttrs'][] = array('title'=>'id','data'=>$course_list[$x]->course_id);
+            $course['title'] = $course_list[$x]->title;
+            $course['data']=array();
+            $test_list =DB::table('tests')
                 ->select('id','title')
-                ->where('course_id',$course_list[$i]['course_id'])->get();
-            $course_test_list[$i] = json_decode(json_encode($temp),true);                
-        }        
-      
-        $tests =DB::table('tests')->select('title','id')->get();
-        $last_q_id = DB::table('questions')->select('id')->orderBy('id','DESC')->first();
-        $last_id = 1;
-        if($last_q_id != null)
-            $last_id = $last_q_id->id;
-        $question_count = DB::table('questions')->count();
-        if ( $question_count==0)
-        {
-            $question_infos="";
-            $question_list="";
-
-            return view('backend.questions.create')-> with('tests', $tests)
-            ->with('course_list',$course_list)->with('course_test_list',$course_test_list)->with('last_q_id', $last_id);
-        }
-        else
-        {
-
-            $test_list =DB::table('question_test')    
-            ->select('test_id')
-            ->groupBy('test_id')->get();
-            $test_list= json_decode(json_encode($test_list),true);
-            $tn = count($test_list);
-            for ($i=0;$i < $tn;$i++)
+                ->where('course_id',$course_list[$x]->course_id)->get();
+            for ($y=0;$y <count($test_list);$y++)
             {
-                $temp =DB::table('questions')
-                    ->join('question_test','questions.id','=','question_test.question_id' )
-                    ->select('id','question')
-                    ->where('question_test.test_id',$test_list[$i]['test_id'])->get();
-                    
-                $question_list[$test_list[$i]['test_id']] = json_decode(json_encode($temp),true);                
-            }
-            //$tests = \App\Models\Test::get()->pluck('title', 'id');
-            //$question_infos = \App\Models\Question::all();       
-            $question_infos = DB::table('questions')
+                $test=array();
+                $test['dataAttrs'][] = array('title'=>'type','data' =>'test');
+                $test['dataAttrs'][] = array('title'=>'id','data'=>$test_list[$y]->id);
+                $test['title'] = $test_list[$y]->title;
+                $test['data']=array();
+                $question_list =DB::table('questions')
+                        ->join('question_test','questions.id','=','question_test.question_id' )
+                        ->select('id','question','questiontype')
+                        ->where('question_test.test_id',$test_list[$y]->id)->get();
+                for ($z=0;$z <count($question_list);$z++)
+                {
+                    $questionArr=array();
+                    $questionArr['dataAttrs'][] = array('title'=>'type','data' =>'question');
+                    $questionArr['dataAttrs'][] = array('title'=>'id','data'=>$question_list[$z]->id);
+                    $questionArr['dataAttrs'][] = array('title'=>'question-type','data'=>$question_list[$z]->questiontype);
+                    $questionArr['title'] = $question_list[$z]->id.".".$question_list[$z]->question;
+                    $test['data'][]=$questionArr;
+                }
+                $course['data'][]=$test;
+            }    
+            $courses[]=$course;
+        }
+
+        $test_list =DB::table('question_test')    
+        ->select('test_id')
+        ->groupBy('test_id')->get();
+        $test_list= json_decode(json_encode($test_list),true);
+        $tn = count($test_list);
+        for ($i=0;$i < $tn;$i++)
+        {
+            $temp =DB::table('questions')
                 ->join('question_test','questions.id','=','question_test.question_id' )
-                ->join('tests', 'tests.id', '=', 'question_test.test_id')
-                ->select('questions.id','questions.content','question_test.test_id','questions.questiontype', 'tests.title')
-                ->orderBy('question_test.test_id','asc')->get();
-                           
+                ->select('id','question')
+                ->where('question_test.test_id',$test_list[$i]['test_id'])->get();
+                
+            $question_list[$test_list[$i]['test_id']] = json_decode(json_encode($temp),true);                
+        }
+        //$tests = \App\Models\Test::get()->pluck('title', 'id');
+        //$question_infos = \App\Models\Question::all();       
+        $question_infos = DB::table('questions')
+            ->join('question_test','questions.id','=','question_test.question_id' )
+            ->join('tests', 'tests.id', '=', 'question_test.test_id')
+            ->select('questions.id','questions.content','question_test.test_id','questions.questiontype', 'tests.title')
+            ->orderBy('question_test.test_id','asc')->get();
+        $tests =DB::table('tests')->select('title','id')->get();
             //$courses =DB::table('courses')->select('title','id')->get();            
             //$courses = \App\Models\Course::get()->pluck('title', 'id');
             return view('backend.questions.create')->with('question_infos', $question_infos)-> with('tests', $tests)
-                ->with('course_list',$course_list)->with('course_test_list',$course_test_list)->with('test_list',$test_list)->with('question_list',$question_list)->with('last_q_id', $last_id);
-        }
+                ->with('courses',$courses);
+        
         
     }
 
     public function upload_images(Request $request)
     {
         
-        $destinationPath = 'uploads/image/';
-        $img_name = [];
-        if($request->hasfile('file'))
-        {
-                foreach($request->file('file') as $file)
-                {
-                    $name = time().rand(1,100).'.'.$file->extension();
-                    $file->move($destinationPath, $name);  
-                    $img_name[] = $name; 
-                }
-        }
-        if(is_array($img_name)){
-            if(count($img_name)===1){
-                $img_name=$img_name[0];
-            }
-            else{
-                $img_name = $img_name;
-            }
-        }
-        $output = array(
-            'success'  => 'Images uploaded successfully',
-            'img_name' =>$img_name
-        );
-        return response()->json($output);
+        $destinationPath = 'public/uploads/image/';
+        // URL::assert()
+        $image = $request->file('file');
+        $imageName = time().rand(1,100).'.'.$request->file('file')->extension();
+        $image->move($destinationPath,$imageName);
+        return response()->json(['filename'=>URL::to($destinationPath.$imageName)]);
     }
     public function test(Request $request)
     {
@@ -240,7 +232,7 @@ class QuestionsController extends Controller
     public function user_upload_images(Request $request)
     {
         
-        $destinationPath = 'uploads/storage/';
+        $destinationPath = 'public/uploads/storage/';
         if($request->hasfile('file'))
         {
             $file = $request->file('file');
@@ -265,121 +257,103 @@ class QuestionsController extends Controller
     }
     public function store(Request  $request)
     {
-            // $request->validate([
-            //     'question_content' => 'required',
-            //     'image_widht' => 'required',
-            //     'image_height' => 'required',
-            //     'size' => 'required'
-            // ]);
-            // dd('stop');
-            $validator = Validator::make($request->all(), [
-                'question' => 'required',
-                'test_ids' => 'required',
-                'type_id' => 'required'
+        $validator = Validator::make($request->all(), [
+            'question' => 'required',
+            'test_ids' => 'required',
+            'type_id' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'success' => false,
+                'error' =>
+                $validator->errors()->toArray()
+            ], 400);
+        }
+        if($request->matrix_data !== NULL){
+            $content = $request->matrix_data;
+            $content = str_replace('contenteditable="true"','contenteditable="false"',$content);
+            $content = str_replace('id="delete_matrix_row"','id=""',$content);
+            $content = str_replace('class="btn btn-danger"','class="hide_btn"',$content);
+            $content = str_replace('<th class="custom-hide">Action</th>','<th class="custom-hide"></th>',$content);
+
+        }else{
+            $content = $request->content;//add ckd
+        }
+        $order = DB::table('questions')->max('questionorder');
+        if($order===null){
+            $order=1;
+        }
+        else{
+            $order+=1;
+        }
+        $tests = $request->test_ids;
+        $user_id = auth()->user()->id;
+
+        $last_id= DB::table('questions')->insertGetId([
+            'question' => $request->question,
+            'help_info' => $request->help_info ?? '',
+            'questionimage' => $request->questionimage ?? '',
+            'score' => $request->score ?? '',
+            'userid' =>$user_id,
+            'test_id' => $tests[0] ?? '',
+            'questiontype' => $request->type_id ?? '',
+            //'questionpage' => $request->data['page'],
+            'questionorder' => $order,
+            'width' => $request->width ?? '',
+            'indent' => $request->indent ?? '',
+            'required' => $request->required ?? '',
+
+            'state' => $request->state ?? '',
+            'help_info_location' => $request->help_info_location ?? '',
+            //'ttile_location' => $request->ttile_location ?? '',
+            'max_width' => $request->max_width ?? '',
+            'min_width' => $request->min_width ?? '',
+            'size' => $request->size ?? '',
+            'question_bg_color' => $request->question_bg_color,
+            'more_than_one_answer' => $request->more_than_one_answer ?? '',
+            'fontsize' => $request->fontsize ?? '',
+            'titlelocation' => $request->titlelocation,
+            'imagefit' => $request->imagefit ?? '',
+            'imagewidth' => $request->imagewidth ?? '',
+            'imageheight' => $request->imageheight ?? '',
+            'answerposition' => $request->answerposition,
+            'image_aligment' => $request->image_aligment,
+            'answer_aligment' => $request->answer_aligment,
+
+            'imageposition' => $request->imageposition,
+            'content' =>$content ?? '',
+            'logic' =>$request->logic ?? ''
+
+        ]);
+		if($request->logic){
+            $logic_question = json_decode($request->logic);
+            foreach($logic_question as $logic_ques)
+            {
+                DB::table('question_conditions')->insert([
+                    'question_id' => $last_id,
+                    'condition_to_apply' => $logic_ques->condition_operator,
+                    'operators' => $logic_ques->comparison_operator,
+                    'logic_question_id' => ($logic_ques->question_id) ? $logic_ques->question_id : 0,    
+                ]);
+            }
+        }
+        if($request->matrix_data != NULL){
+            $content = str_replace('[q_id]',$last_id,$content);
+        }
+        if($last_id>0){
+            DB::table('questions')->where('id',$last_id)->update([
+                'content'=> $content
             ]);
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'success' => false,
-                    'error' =>
-                    $validator->errors()->toArray()
-                ], 400);
-            }
-            // dd($request->matrix_data);
-            if($request->matrix_data !== NULL){
-                $content = $request->matrix_data;
-                $content = str_replace('contenteditable="true"','contenteditable="false"',$content);
-                $content = str_replace('id="delete_matrix_row"','id=""',$content);
-                $content = str_replace('class="btn btn-danger"','class="hide_btn"',$content);
-                $content = str_replace('<th class="custom-hide">Action</th>','<th class="custom-hide"></th>',$content);
-
-            }else{
-                $content = $request->content;//add ckd
-                //$content = $request->getContent();
-            }
-            $order = DB::table('questions')->max('questionorder');
-            if($order===null){
-                $order=1;
-            }
-            else{
-                $order+=1;
-            }
-            $tests = $request->test_ids;
-            $user_id = auth()->user()->id;
-
-            // $output = array(
-            // 'success'  => 'gfjghfjdghjkghfkjhgjf'
-            // );
-
-            $last_id= DB::table('questions')->insertGetId([
-                'question' => $request->question,
-                'help_info' => $request->help_info ?? '',
-                'questionimage' => $request->questionimage ?? '',
-                'score' => $request->score ?? '',
-                'userid' =>$user_id,
-                'test_id' => $tests[0] ?? '',
-                'questiontype' => $request->type_id ?? '',
-                //'questionpage' => $request->data['page'],
-                'questionorder' => $order,
-                'width' => $request->width ?? '',
-                'indent' => $request->indent ?? '',
-                'required' => $request->required ?? '',
-
-                'state' => $request->state ?? '',
-                'help_info_location' => $request->help_info_location ?? '',
-                //'ttile_location' => $request->ttile_location ?? '',
-                'max_width' => $request->max_width ?? '',
-                'min_width' => $request->min_width ?? '',
-                'size' => $request->size ?? '',
-                'question_bg_color' => $request->question_bg_color,
-                'more_than_one_answer' => $request->more_than_one_answer ?? '',
-                'fontsize' => $request->fontsize ?? '',
-                'titlelocation' => $request->titlelocation,
-                'imagefit' => $request->imagefit ?? '',
-                'imagewidth' => $request->imagewidth ?? '',
-                'imageheight' => $request->imageheight ?? '',
-                'answerposition' => $request->answerposition,
-                'image_aligment' => $request->image_aligment,
-                'answer_aligment' => $request->answer_aligment,
-
-                'imageposition' => $request->imageposition,
-                'content' =>$content ?? '',
-                'logic' =>$request->logic ?? ''
+        }
+        foreach($tests as $test)
+        { 
+            DB::table('question_test')->insert([
+                'test_id' => $test,
+                'question_id' => $last_id,    
     
             ]);
-			
-			$logic_question = $request->logic_question;
-			$first_operator = $request->first_operator;
-			$operators = $request->operators;
-			$t = 0;
-			foreach($logic_question as $logic_ques)
-			{
-				DB::table('question_conditions')->insert([
-                    'question_id' => $last_id,    
-				    'condition_to_apply' => $first_operator[$t],    
-				    'operators' => $operators[$t],    
-				    'logic_question_id' => ($logic_ques) ? $logic_ques : 0,    
-				]);
-				$t++;
-			}
-			
-			
-            if($request->matrix_data != NULL){
-                $content = str_replace('[q_id]',$last_id,$content);
-            }
-            if($last_id>0){
-                DB::table('questions')->where('id',$last_id)->update([
-                    'content'=> $content
-                ]);
-            }
-            foreach($tests as $test)
-            { 
-                DB::table('question_test')->insert([
-                    'test_id' => $test,
-                    'question_id' => $last_id,    
-        
-                ]);
-            }         
+        }         
 
             $output = array(
             'success'  => 'data is saved successfully',
@@ -522,8 +496,8 @@ class QuestionsController extends Controller
 
     public function get_info(Request  $request)
     {
-        $data= DB::table('questions')->where('id','=',$request->id)->get();
-        return json_encode($data);   
+        $data= DB::table('questions')->where('id','=',$request->id)->first();
+        echo json_encode($data);   
     }
     
 
@@ -550,49 +524,85 @@ class QuestionsController extends Controller
         $current_tests =DB::table('question_test')->select('test_id')->where('question_id', $id)->get();
                   
         $question_count = DB::table('questions')->count();     
-            
+        $courses =array();
         $course_list =DB::table('tests')            
         ->join('courses', 'tests.course_id', '=', 'courses.id')
         ->select('course_id','courses.title')
         ->groupBy('course_id')->get();
-
-        $course_list= json_decode(json_encode($course_list),true);
-
-        for ($i=0;$i <count($course_list);$i++)
+        for ($x=0;$x <count($course_list);$x++)
         {
-            $temp =DB::table('tests')
+            $course=array();
+            $course['dataAttrs'][] = array('title'=>'type','data' =>'course');
+            $course['dataAttrs'][] = array('title'=>'id','data'=>$course_list[$x]->course_id);
+            $course['title'] = $course_list[$x]->title;
+            $course['data']=array();
+            $test_list =DB::table('tests')
                 ->select('id','title')
-                ->where('course_id',$course_list[$i]['course_id'])->get();
-            $course_test_list[$i] = json_decode(json_encode($temp),true);                
-        }        
-    
-        $tests =DB::table('tests')->select('title','id')->get();
-
-        $test_list =DB::table('question_test')    
-        ->select('test_id')
-        ->groupBy('test_id')->get();
-        $test_list= json_decode(json_encode($test_list),true);
-
-
-        for ($i=0;$i <count($test_list);$i++)
-        {
-            $temp =DB::table('questions')
-                ->join('question_test','questions.id','=','question_test.question_id' )
-                ->select('id','question')
-                ->where('question_test.test_id',$test_list[$i]['test_id'])->get();
-                
-            $question_list[$test_list[$i]['test_id']] = json_decode(json_encode($temp),true);                
+                ->where('course_id',$course_list[$x]->course_id)->get();
+            for ($y=0;$y <count($test_list);$y++)
+            {
+                $test=array();
+                $test['dataAttrs'][] = array('title'=>'type','data' =>'test');
+                $test['dataAttrs'][] = array('title'=>'id','data'=>$test_list[$y]->id);
+                $test['title'] = $test_list[$y]->title;
+                $test['data']=array();
+                $question_list =DB::table('questions')
+                        ->join('question_test','questions.id','=','question_test.question_id' )
+                        ->select('id','question','questiontype')
+                        ->where('question_test.test_id',$test_list[$y]->id)->get();
+                for ($z=0;$z <count($question_list);$z++)
+                {
+                    $questionArr=array();
+                    $questionArr['dataAttrs'][] = array('title'=>'type','data' =>'question');
+                    $questionArr['dataAttrs'][] = array('title'=>'id','data'=>$question_list[$z]->id);
+                    $questionArr['dataAttrs'][] = array('title'=>'question-type','data'=>$question_list[$z]->questiontype);
+                    $questionArr['title'] = $question_list[$z]->id.".".$question_list[$z]->question;
+                    $test['data'][]=$questionArr;
+                }
+                $course['data'][]=$test;
+            }    
+            $courses[]=$course;
         }
-    
-        $question_infos = DB::table('questions')
-            ->orderBy('questions.id','asc')->first();
-            
+        $tests =DB::table('tests')->select('title','id')->get();
         $question_tests = DB::table('question_test')->select('test_id')->where('question_id',$question->id)->get();
+        // $course_list= json_decode(json_encode($course_list),true);
+
+        // for ($i=0;$i <count($course_list);$i++)
+        // {
+        //     $temp =DB::table('tests')
+        //         ->select('id','title')
+        //         ->where('course_id',$course_list[$i]['course_id'])->get();
+        //     $course_test_list[$i] = json_decode(json_encode($temp),true);                
+        // }        
+    
+        // $tests =DB::table('tests')->select('title','id')->get();
+
+        // $test_list =DB::table('question_test')    
+        // ->select('test_id')
+        // ->groupBy('test_id')->get();
+        // $test_list= json_decode(json_encode($test_list),true);
+
+
+        // for ($i=0;$i <count($test_list);$i++)
+        // {
+        //     $temp =DB::table('questions')
+        //         ->join('question_test','questions.id','=','question_test.question_id' )
+        //         ->select('id','question')
+        //         ->where('question_test.test_id',$test_list[$i]['test_id'])->get();
+                
+        //     $question_list[$test_list[$i]['test_id']] = json_decode(json_encode($temp),true);                
+        // }
+    
+        // $question_infos = DB::table('questions')
+        //     ->orderBy('questions.id','asc')->first();
+            
+        // $question_tests = DB::table('question_test')->select('test_id')->where('question_id',$question->id)->get();
         
     
-        return view('backend.questions.edit')->with('current_question',$question)->with('current_tests',$current_tests)->with('question_infos', $question_infos)-> with('tests', $tests)
-            ->with('course_list',$course_list)->with('course_test_list',$course_test_list)->with('test_list',$test_list)->with('question_list',$question_list)->with('question', $question)
-            ->with('question_tests',$question_tests);
+        // return view('backend.questions.edit')->with('current_question',$question)->with('current_tests',$current_tests)->with('question_infos', $question_infos)-> with('tests', $tests)
+        //     ->with('course_list',$course_list)->with('course_test_list',$course_test_list)->with('test_list',$test_list)->with('question_list',$question_list)->with('question', $question)
+        //     ->with('question_tests',$question_tests);
+        return view('backend.questions.edit')->with('courses',$courses)->with('tests', $tests)->with('question_tests',$question_tests)->with('question', $question);
     
     
     }

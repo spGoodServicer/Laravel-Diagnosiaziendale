@@ -85,7 +85,7 @@ div#preloader {
   height: 100%;
   overflow: visible;
   background-color: #fff;
-  background: #fff url(/images/preloader.gif?0a8c26e802929c038e2fc11565019dfb) no-repeat center center;
+  background: #fff url(../images/preloader.gif?0a8c26e802929c038e2fc11565019dfb) no-repeat center center;
 }
 
 a {
@@ -360,7 +360,7 @@ h6 {
 }
 
 .breadcrumb-section {
-  background-image: url(/images/brt-1.jpg?8fa08d9daef6d16cbadbbd1e5d1d6988);
+  background-image: url(../images/brt-1.jpg?8fa08d9daef6d16cbadbbd1e5d1d6988);
   padding-bottom: 355px;
 }
 
@@ -833,7 +833,7 @@ h6 {
 .modal-header {
   padding: 0;
   position: relative;
-  background-image: url(/images/pb.jpg?778942a2fa506db8b32539e0ab3aa018);
+  background-image: url(../images/pb.jpg?778942a2fa506db8b32539e0ab3aa018);
 }
 
 .modal-header .gradient-bg,
@@ -1597,7 +1597,7 @@ button.alt-menu-btn.float-left {
 }
 
 .home-secound-course-search {
-  background-image: url(/images/hb-2.jpg?3f8dca320aa4390ab80a9e5cbd366c0b);
+  background-image: url(../images/hb-2.jpg?3f8dca320aa4390ab80a9e5cbd366c0b);
   padding-bottom: 0;
 }
 
@@ -2061,7 +2061,7 @@ button.alt-menu-btn.float-left {
 }
 
 .home-secound .about-resigter-form {
-  background-image: url(/images/abt.jpg?26582de55693df2c27ad0c98642910dc);
+  background-image: url(../images/abt.jpg?26582de55693df2c27ad0c98642910dc);
   max-width: 420px;
   margin-top: 5px;
   padding: 50px;
@@ -2186,7 +2186,7 @@ button.alt-menu-btn.float-left {
 /*----------------------------------------------------*/
 
 .why-choose-us-section .jarallax {
-  background-image: url(/images/tesit-b-1.jpg?71534b4f991950d53a0ccd028d914fa8);
+  background-image: url(../images/tesit-b-1.jpg?71534b4f991950d53a0ccd028d914fa8);
   padding: 140px 0px 115px 0px;
 }
 
@@ -2832,7 +2832,7 @@ button.alt-menu-btn.float-left {
 /*----------------------------------------------------*/
 
 .course-teacher-section .jarallax {
-  background-image: url(/images/teacher-b.jpg?7a0928d49893beff6734c7125fd08629);
+  background-image: url(../images/teacher-b.jpg?7a0928d49893beff6734c7125fd08629);
   padding: 110px 0px 100px 0px;
 }
 
@@ -3833,7 +3833,7 @@ ul.product-tab li.active:after {
 }
 
 .faq-secound-home-version {
-  background-image: url(/images/fq-1.jpg?b799c3d925d7ff1312d2ac45537b136a);
+  background-image: url(../images/fq-1.jpg?b799c3d925d7ff1312d2ac45537b136a);
   padding: 110px 0px 40px 0px;
 }
 
@@ -4160,7 +4160,7 @@ ul.product-tab li.active:after {
 /*----------------------------------------------------*/
 
 .why-choose-section {
-  background-image: url(/images/wc-1.jpg?6abd1526b0db9545dd53cc1a2997b84e);
+  background-image: url(../images/wc-1.jpg?6abd1526b0db9545dd53cc1a2997b84e);
   padding-top: 115px;
 }
 
@@ -4274,7 +4274,7 @@ ul.product-tab li.active:after {
 
 .contact-area-section,
 .contact_secound_section {
-  background-image: url(/images/contact-b.jpg?7074d794ff7f22c91999d1527d34bbf5);
+  background-image: url(../images/contact-b.jpg?7074d794ff7f22c91999d1527d34bbf5);
   padding: 120px 0px 140px;
 }
 
@@ -4355,7 +4355,7 @@ ul.product-tab li.active:after {
 }
 
 .contact_secound_section {
-  background-image: url(/images/cf-1.png?ffe769692e5d5c4a1aa75c2095a8b4b2);
+  background-image: url(../images/cf-1.png?ffe769692e5d5c4a1aa75c2095a8b4b2);
   padding: 270px 0px 0px;
   background-color: #f7f7f7;
 }

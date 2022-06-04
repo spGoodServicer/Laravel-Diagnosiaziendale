@@ -89,12 +89,12 @@
                                             @csrf
                                             <div class="form-group">
                                                 <label class="form-label">Image</label>
-                                                <input type="file" id="img" class="form-control" name="file[]" accept="image/*">
-                                                <input type="hidden" id="quiz_img" name="quiz_img" value="">
+                                                <input type="file" id="quiz_img" class="form-control" name="file" accept="image/*">
+                                                <input type="hidden" id="quiz_img_name" name="quiz_img_name" >
                                                 
                                             </div>
                                         </form>
-                                        <input type="hidden" name="last_q_id" id="last_q_id" value="{{$last_q_id}}">
+                                        
                                     </div>       
                             </div>
                         </div>
@@ -107,81 +107,25 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-2">
-                            @php
-                                $question_type =['Single Input','Check Box','RadioGroup','Image','Matrix','Rating','Dropdown','File','Stars','Range','€'];
-                            @endphp
                             {!! Form::label('question_type', trans('labels.backend.questions.fields.question_type'), ['class' => 'control-label']) !!}
                             <select class="form-control"  name="options" id="question_type" placeholder="Options">
-                                @for($i=0 ;$i< count($question_type);$i++)   
-                                    <option value="{{$i}}">{{ $question_type[$i]}}</option>
-                                @endfor
-                                </select>
-                            <p class="help-block" id="question_type1"></p>
+                                @foreach(config('constants.question_types') as $question_type_key=>$question_type_label)   
+                                    <option value="{{$question_type_key}}" >{{ $question_type_label}}</option>
+                                @endforeach
+                            </select>
+                            <p class="help-block"></p>
                         </div>
                         <div id="question-type-box">
-                            {{-- Single Input --}}
-                            @include('backend.questions.components.simple.single_input',[
-                                
-                            ])
-                            {{-- End Signle Input --}}
-
-                            {{-- Checkbox --}}
-                            @include('backend.questions.components.simple.checkbox',[
-                                'display' => 'none'
-                            ])
-                            {{-- End Checkbox --}}
-
-                            {{-- Radio Group --}}
-                            @include('backend.questions.components.simple.radiogroup',[
-                                'display' => 'none'
-                            ])
-                            {{-- End Radio Group --}}
-                            
-                            {{-- Image --}}
-                            @include('backend.questions.components.simple.image',[
-                                'display' => 'none'
-                            ])  
-                            {{-- End Image --}}            
-
-                            {{-- Matrix --}}
-                            @include('backend.questions.components.simple.matrix',[
-                                'display' => 'none'
-                            ])
-                            {{-- End Matrix --}}
-                            
-                            {{--File Upload--}}
-                            @include('backend.questions.components.simple.file',[
-                                'display' => 'none'
-                            ])
-                            {{-- End File Upload --}}
-                            
-                            {{--Dropdown--}}
-                            @include('backend.questions.components.simple.dropdown',[
-                                'display' => 'none'
-                            ])
-                            {{-- End Dropdown --}}
-
-                            {{-- Range --}}
-                            @include('backend.questions.components.simple.range',[
-                                'display' => 'none'
-                            ])
-                            {{-- End Range --}}
-                            
-                            {{-- Rating --}}
-                            @include('backend.questions.components.simple.rating',[
-                                'display' => 'none'
-                            ])
-                            {{-- End Rating --}}
-
-                            {{-- € --}}
-                            @include('backend.questions.components.simple.euro',[
-                                'display' => 'none'
-                            ])
-                            {{-- End € --}}
-                            
-                            <div id="score-box" class="form-group" style="display: none;">
+                            @foreach(config('constants.question_types') as $question_type_key=>$question_type_label)   
+                                @if ($loop->first)
+                                    @include('backend.questions.components.simple.'.$question_type_key,['content' => ''])
+                                @else
+                                    @include('backend.questions.components.simple.'.$question_type_key,[ 'display' => 'none'])
+                                @endif
+                            @endforeach
+                            <div id="score-box" class="form-group show_single_input">
                                 <label class="from-label">Score</label>
-                                <input type="number" id="score" name="score"  class="form-control" placeholder="0">
+                                <input type="number" id="score" name="score"  class="form-control" placeholder="0" >
                             </div>
                         </div>
                     </div>
@@ -198,76 +142,42 @@
                             <div class="col-12 form-group">                    
                                 <div>
                                     <div class="logic_part" style="border:1px solid #bbbbbb;padding:10px;">
-                                        {{--  <a id="logic_open" class="btn btn-primary" style="color:white; margin-top:10px;">Logic Start</a>  --}}
-                                    {{--  <a id="condition_add" class="btn btn-success" style="color:white; margin-top:10px;" >Add Condition</a>  --}}
-                                        <div class="text-right">
-                                            <button id="condition_add" class="btn btn-danger">Add Condition</button>
-                                        </div>
+                                        
                                         <div id="sortable-14">
-                                            @for($hh =0;$hh<5;$hh++)
-                                                <div class="logic_condition row clone_condition" style="padding-top:10px;">
-                                                        <div class="col-3">
-                                                            <select class="form-control btn-primary first_operator" name="first_operator[]" placeholder="Options">
-                                                                <option value="0">And</option>
-                                                                <option value="1">Or</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-4">
-                                                            <input type="text" class="btn-success qt_name form-control" >
-                                    
-                                                            <div class="tree_1 tree-demo" display="none">
-                                                                <ul class="treecontent">
-                                                                    @for ($i=0;$i<count($course_list);$i++)
-                                                                    <li>                  
-                                                                    {{ $course_list[$i]['title'] }} </a>
-                                                                        <ul>
-                                                                            @for ($j=0;$j<count($course_test_list[$i]);$j++)
-                                                                                <li>
-                                                                                    {{ $course_test_list[$i][$j]['title']}}
-                                                                                    <ul>
-                                                                                        <?php
-                                                                                            $tk=  $course_test_list[$i][$j]['id'];
-                                                                                        ?>
-                                                                                        @if(isset($question_list[$tk]))
-                                                                                            @for ($k=0;$k<count($question_list[$tk]);$k++)
-                                                                                                <li class="question_t" data-id="{{ $question_list[$tk][$k]['id'] }}">
-                                                                                                    {{ $question_list[$tk][$k]['id'] }}.{{ $question_list[$tk][$k]['question'] }}
-                                                                                                </li>
-                                                                                            @endfor
-                                                                                        @endif
-                                                                                    </ul>
-                                                                                </li>
-                                                                            @endfor
-                                                                        </ul>
-                                                                    </li>                                     
-                                                                    @endfor
-                                                                </ul>                   
-                                                            </div>
-                                                        </div>
-                                                        <input class="qt_type" type="hidden" value="">
-														<input class="logic_question_id" name="logic_question[]" type="hidden" value="">
-                                                        <div class="col-5">                                    
-                                                            <select class="form-control btn-warning operators" name="operators[]" placeholder="Options">
-                                                                <?php
-                                                                    $operators=["equals","not equals","contains","not contains","greater","less","greater or equals","less or equals"];
-                                                                ?>
-                                                                @for($i=0;$i<count($operators);$i++)
-                                                                    <option value="{{ $i }}">{{ $operators[$i] }}</option>
-                                                                @endfor                                       
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-12 logic-content" style="padding-top:10px">
-                                                        </div>
-                                                        <div class="col-12" style="padding-top:10px;">                                            
-                                                            <a class="btn btn-xs  btn-danger del-btnx" style="cursor:pointer;"><i class="fa fa-trash" style="color:white"></i></a>
-                                                        </div>                                    
-                                                
+                                            <div class="row">
+                                                <div class="col-1 offset-11">
+                                                    <button id="condition_add" class="btn btn-xs btn-primary"><i class="fa fa-plus"></i></button>
                                                 </div>
-                                            @endfor
+                                            </div>
+                                                <div class="logic_condition row clone_condition mt-1">
+                                                    <div class="col-12 logic-question-part"></div>
+                                                    <div class="col-2">
+                                                        <select class="form-control btn-primary condition_operator">
+                                                            <option value="and">And</option>
+                                                            <option value="or">Or</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="dropdown dropdown-tree question-dropdown-tree"></div>
+                                                    </div>
+                                                    <div class="col-3">                                    
+                                                        <select class="form-control btn-warning comparison_operator">
+                                                            @foreach(config('constants.comparison_operators') as $opKey => $opVal)
+                                                                <option value="{{ $opKey }}">{{ $opVal }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-1">                                            
+                                                        <button class="btn btn-xs  btn-danger del-btnx"><i class="fa fa-trash"></i></button>
+                                                    </div>
+                                                    <div class="col-12 row logic-content"></div>
+                                                </div>
+                                             
+                                            
                                         </div>                            
                                     </div>
                                 </div>
-                                </div>
+                            </div>
                                     @if($errors->has('question'))
                                         <p class="help-block">
                                             {{ $errors->first('question') }}
@@ -419,7 +329,8 @@
     
     <script type="text/javascript" src="{{asset('js/select2.full.min.js')}}"></script>
     <script type="text/javascript" src="{{asset('js/main.js')}}"></script>
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="{{asset('plugins/sweetalert2/sweetalert2.min.js')}}"></script>
+    {{-- <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script> --}}
 
     <script type="text/javascript" src="{{asset('js/ui-nestable.js')}}"></script>
     <script type="text/javascript" src="{{asset('js/jquery.nestable.js')}}"></script>
@@ -447,6 +358,8 @@
     <script type="text/javascript" src="{{asset('/vendor/unisharp/laravel-ckeditor/adapters/jquery.js')}}"></script>
 -->
     <script src="{{asset('/vendor/laravel-filemanager/js/lfm.js')}}"></script>
+    <link rel="stylesheet" type="text/css" href="{{asset('plugins/dropzone/min/dropzone.min.css')}}"/>   
+    <script src="{{asset('plugins/dropzone/min/dropzone.min.js')}}"></script>
     <script>
 
         CKEDITOR.replace('question_content', {
@@ -470,7 +383,7 @@
             // Layout.init(); // init current layout
             // QuickSidebar.init(); // init quick sidebar
             // Demo.init(); // init demo features
-            UITree.init();  
+            UITree.selectQuestion(@json($courses));  
             UINestable.init();
             TableEditable.init();
             QuestionCreate.init();  

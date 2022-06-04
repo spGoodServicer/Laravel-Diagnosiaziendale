@@ -1,8 +1,8 @@
 {{-- Image --}}
 @php
     $image_count = 2;
-    if(isset($question->content) && $question->content != null){
-        $content = json_decode($question->content);
+    if(isset($content) && $content != null &&$content != ''){
+        $content = json_decode($content);
         if(is_array($content)){
             $col = isset($content[(sizeof($content))-1]->col)?$content[(sizeof($content))-1]->col:'';
         }
@@ -10,6 +10,8 @@
             $col = '';
         }
         
+    }else{
+        $content=null;
     }
 @endphp
 <div id="image_part" class="row question-box" @if(isset($display)) style="display:{{$display}};" @endif>
@@ -22,58 +24,70 @@
             <option value="col-4" {{isset($content)?($col == 'col-4')?'selected':'':''}}>4</option>
         </select>
     </div>
-    <div class="col-md-12 form-body">                                    
-        <div class="form-group ">
-            <!-- <label class="control-label col-md-3">Image Upload</label> -->
-            <div class="col-md-9">
-                <form method="POST" enctype="multipart/form-data" class="image-upload-form" action="javascript:void(0)" id="sortable-13">
-                    @csrf
-                    <div class="form-group " id="sortable-11">
-                        <div class="input-group hdtuto control-group lst increment image_part_file" >
-                                <input type="file" name="file[]" class="b-images myfrm form-control images" value="">
-                                <input  class="imge_names" type="hidden"  value="">
-                                <div class="input-group-btn"> 
-                                    <button class="btn btn-success add-btn" type="button">+</button>
-                                </div>
-                                <label  style="margin-left:5vw;margin-right:1vw;">Score</label>
-                                <input  class="image_score" type="text"   value="" style="margin-right:1vw">
-                        </div>
-                        <div class="clone">
-                            @if(isset($content) && !empty($content[0]->image))
-                                    @foreach($content[0]->image as $key=>$c)
-                                            <div class="image_part_file" >
-                                                <div class="hdtuto control-group lst input-group" style="margin-top:10px">
-                                                    <input type="file" name="file" class="b-images images myfrm form-control" value="{{$c}}">
-                                                    <input  class="imge_names" type="hidden"  value="{{$c}}">
-                                                    <div class="input-group-btn"> 
-                                                    <button class="btn btn-danger del-btn" type="button"><i class="fa fa-trash" style="color:white"></i></button>
-                                                    </div>
-                                                    <label  style="margin-left:5vw;margin-right:1vw;">Score</label>
-                                                    <input  class="image_score" type="text"   value="{{$content[0]->score[$key]}}" style="margin-right:1vw">
-                                                </div>                                    
-                                            </div>
-                                    @endforeach
-                                @else
-                                    <div class="image_part_file" >
-                                        <div class="hdtuto control-group lst input-group" style="margin-top:10px">
-                                            <input type="file" name="file[]" class="b-images images myfrm form-control q">
-                                            <div class="input-group-btn"> 
-                                            <button class="btn btn-danger del-btn" type="button"><i class="fa fa-trash" style="color:white"></i></button>
-                                            </div>
-                                            <label  style="margin-left:5vw;margin-right:1vw;">Score</label>
-                                            <input  class="image_score" type="text"   value="" style="margin-right:1vw">
-                                    
-                                        </div>                                  
-                                    </div>
-                                @endif
-                        </div>
+    <div class="col-md-12 form-body mt-4">                                    
+        <div class="card card-default">
+            <div class="card-body">
+              <div id="actions" class="row">
+                <div class="col-lg-6">
+                  <div class="btn-group w-100">
+                    <span class="btn btn-success col fileinput-button">
+                      <i class="fas fa-plus"></i>
+                      <span>Add files</span>
+                    </span>
+                  </div>
+                </div>
+                <div class="col-lg-6 d-flex align-items-center">
+                  <div class="fileupload-process w-100">
+                    <div id="total-progress" class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                      <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
                     </div>
-                    
-            
-                {{-- <button type="submit" class="btn btn-success" style="margin-top:10px">Submit</button>     --}}
-                </form>
+                  </div>
+                </div>
+              </div>
+              <div class="table table-striped files" id="previews">
+                @if($content && count($content)>1)
+                    @foreach ($content as $row)
+                        @if($loop->last)
+                            @break
+                        @endif
+                        <div class="row mt-2 dz-processing dz-image-preview dz-success dz-complete" data-file-name='{{$row->file}}'>
+                            <div class="col-auto">
+                                <span class="preview"><img src="{{$row->file}}" alt="" data-dz-thumbnail data-xblocker="passed" style="width: 80px; height: 80px; object-fit: none; visibility: visible;" width="80px" height="80px"/></span>
+                            </div>
+                            
+                            <div class="col-4 d-flex align-items-center contain-score">
+                                <input type="number" placeholder="score" class="form-control image-score-value" value="{{$row->score}}" />
+                            </div>
+                            <div class="col-auto d-flex align-items-center">
+                            <div class="btn-group">
+                                <button data-dz-remove class="btn btn-danger delete">
+                                <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            </div>
+                        </div>
+                    @endforeach
+                @endif
+                <div id="template" class="row mt-2">
+                  <div class="col-auto">
+                      <span class="preview"><img src="data:," alt="" data-dz-thumbnail /></span>
+                  </div>
+                  <div class="col-4 d-flex align-items-center contain-progress">
+                      <div class="progress progress-striped active w-100" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                        <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
+                      </div>
+                  </div>
+                  <div class="col-auto d-flex align-items-center">
+                    <div class="btn-group">
+                      <button data-dz-remove class="btn btn-danger delete">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-        </div>            
+          </div> 
     </div>
 </div>   
 {{-- End Image --}}

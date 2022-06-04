@@ -8,7 +8,7 @@
     --}}
     @foreach($locales as $lang)
         @if($lang != app()->getLocale())
-            <small><a href="{{ '/lang/'.$lang }}" class="dropdown-item">{{(trans('menus.language-picker.langs.'.$lang)) ? trans('menus.language-picker.langs.'.$lang) : $lang  }}</a></small>
+            <small><a href="{{ url('/lang/'.$lang) }}" class="dropdown-item">{{(trans('menus.language-picker.langs.'.$lang)) ? trans('menus.language-picker.langs.'.$lang) : $lang  }}</a></small>
         @endif
     @endforeach
 </div>

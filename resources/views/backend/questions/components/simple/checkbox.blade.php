@@ -13,7 +13,7 @@
             <option value="col-4">4</option>
         </select>
     </div>
-    <div id="sortable-10" class="col-12 form-group">
+    <div id="sortable-10" class="col-12 form-group mt-4">
         @if(isset($content))
             @php
                 $radioContent = json_decode($content);
@@ -21,11 +21,10 @@
             @foreach($radioContent as $key=>$c)
                 @if($key != (sizeof($radioContent)-1))
                 <div  class="checkbox">
-                    <label style="color:transparent">
-                    
-                        <input type="checkbox"   class="check_box_q">Option 1
+                    <label>
+                        <input type="checkbox" @if($c->is_checked==1) checked @endif class="check_box_q"> &nbsp;
                     </label>
-                    <input class="check_label" type="text" value="{{$c->label}}" style="margin-left:-2vw;margin-right:5vw;z-index:20;border:none;">
+                    <input class="check_label" type="text" value="{{$c->label}}"  style="border:none;">
                     <label >Score</label>
                     <input type="text"  class="checkbox_score"  value="{{$c->score}}" style="margin-right:1vw">
                     

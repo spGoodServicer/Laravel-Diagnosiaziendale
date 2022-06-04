@@ -8,19 +8,20 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        @if(config('favicon_image') != "")
+            <link rel="shortcut icon" type="image/x-icon" href="{{asset('storage/logos/'.config('favicon_image'))}}"/>
+        @endif
         <title>@yield('title', app_name())</title>
         <meta name="description" content="@yield('meta_description', '')">
         <meta name="keywords" content="@yield('meta_keywords', '')">
 
-
-    {{-- See https://laravel.com/docs/5.5/blade#stacks for usage --}}
-    @stack('before-styles')
+        {{-- See https://laravel.com/docs/5.5/blade#stacks for usage --}}
+        @stack('before-styles')
 
     <!-- Check if the language is set to RTL, so apply the RTL layouts -->
         <!-- Otherwise apply the normal LTR layouts -->
 
         <link rel="stylesheet" href="{{asset('assets/css/owl.carousel.css')}}">
-        <link rel="stylesheet" href="{{asset('assets/css/fontawesome-all.css')}}">
         <link rel="stylesheet" href="{{asset('assets/css/flaticon.css')}}">
         <link rel="stylesheet" type="text/css" href="{{asset('assets/css/meanmenu.css')}}">
         <link rel="stylesheet" href="{{asset('assets/css/bootstrap.min.css')}}">
@@ -30,6 +31,7 @@
         <link rel="stylesheet" href="{{asset('assets/css/animate.min.css')}}">
         {{--<link rel="stylesheet" href="{{asset('assets/css/style.css')}}">--}}
         <link rel="stylesheet" href="{{ asset('css/frontend.css') }}">
+        <link rel="stylesheet" href="{{asset('assets/css/fontawesome-all.css')}}">
 
         <link rel="stylesheet" href="{{asset('assets/css/responsive.css')}}">
 
@@ -51,33 +53,40 @@
         <link href="{{asset('assets/css/colors/color-9.css')}}" rel="alternate stylesheet" type="text/css"
               title="color-9">
 
+        {{--  <link href="{{asset('assets/metronic_assets/global/plugins/icheck/skins/all.css')}}" id="style_components" rel="stylesheet" type="text/css"/>  --}}
+        <link href="{{asset('assets/metronic_assets/global/css/components.css')}}" id="style_components" rel="stylesheet" type="text/css"/>
+        {{--  <link rel="stylesheet" type="text/css" href="{{asset('assets/metronic_assets/global/plugins/bootstrap-select/bootstrap-select.min.css')}}"/>  --}}
+           
+      
+
         <link href="{{asset('/vendor/unisharp/laravel-ckeditor/plugins/codesnippet/lib/highlight/styles/monokai.css') }}" rel="stylesheet">
         <script src="{{asset('/vendor/unisharp/laravel-ckeditor/plugins/codesnippet/lib/highlight/highlight.pack.js') }}"></script>
         <script>hljs.initHighlightingOnLoad();</script>
 
-        @stack('after-styles')
         @yield('css')
+        @stack('after-styles')
+
         @if(config('onesignal_status') == 1)
             {!! config('onesignal_data') !!}
         @endif
-    @if(config('google_analytics_id') != "")
 
-        <!-- Global site tag (gtag.js) - Google Analytics -->
+        @if(config('google_analytics_id') != "")
+    <!-- Global site tag (gtag.js) - Google Analytics -->
         <script async src="https://www.googletagmanager.com/gtag/js?id={{config('google_analytics_id')}}"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
 
-            gtag('config','{{config('google_analytics_id')}}');
+            gtag('config', '{{config('google_analytics_id')}}');
         </script>
-     @endif
-
+            @endif
         @if(!empty(config('custom_css')))
             <style>
                 {!! config('custom_css')  !!}
             </style>
         @endif
+
     </head>
     <body class="{{config('layout_type')}}">
 
@@ -87,17 +96,18 @@
 
 
     <!-- Start of Header section
-    ============================================= -->
+        ============================================= -->
         <header>
             <div id="main-menu" class="main-menu-container">
                 <div class="main-menu">
                     <div class="container">
                         <div class="navbar-default">
                             <div class="navbar-header float-left">
-                                <a class="navbar-brand text-uppercase" href="{{url('/')}}"><img
-                                            src={{asset("storage/logos/".config('logo_w_image'))}} alt="logo"></a>
+                                <a class="navbar-brand text-uppercase" href="{{url('/')}}">
+                                    {{--<img src="{{asset("storage/logos/".config('logo_w_image'))}}" alt="logo">--}}
+                                    <img src="{{asset("storage/logos/".config('logo_w_image'))}}" alt="logo">
+                                </a>
                             </div><!-- /.navbar-header -->
-
 
                             <div class="cart-search float-right ul-li">
                                 <ul>
@@ -107,10 +117,10 @@
                                                 <span class="badge badge-danger position-absolute">{{Cart::session(auth()->user()->id)->getTotalQuantity()}}</span>
                                             @endif
                                         </a>
-
                                     </li>
                                 </ul>
                             </div>
+
 
                             <!-- Collect the nav links, forms, and other content for toggling -->
                             <nav class="navbar-menu float-right">
@@ -118,13 +128,16 @@
                                     <ul>
                                         @if(count($custom_menus) > 0 )
                                             @foreach($custom_menus as $menu)
+                                                {{--@if(is_array($menu['id']) && $menu['id'] == $menu['parent'])--}}
+                                                    {{--@if($menu->subs && (count($menu->subs) > 0))--}}
                                                 @if($menu['id'] == $menu['parent'])
                                                     @if(count($menu->subs) == 0)
-                                                        <li class="nav-item">
+                                                        <li class="">
                                                             <a href="{{asset($menu->link)}}"
                                                                class="nav-link {{ active_class(Active::checkRoute('frontend.user.dashboard')) }}"
                                                                id="menu-{{$menu->id}}">{{trans('custom-menu.'.$menu_name.'.'.str_slug($menu->label))}}</a>
                                                         </li>
+
                                                     @else
                                                         <li class="menu-item-has-children ul-li-block">
                                                             <a href="#!">{{trans('custom-menu.'.$menu_name.'.'.str_slug($menu->label))}}</a>
@@ -135,19 +148,18 @@
                                                             </ul>
                                                         </li>
                                                     @endif
-
                                                 @endif
                                             @endforeach
                                         @endif
 
                                         @if(auth()->check())
                                             @if($logged_in_user->hasRole('student'))
-                                                <li>
-                                                    <a href="{{ route('admin.dashboard') }}">@lang('navs.frontend.dashboard')</a>
-                                                </li>
-                                                <li>
-                                                    <a href="{{ route('frontend.auth.logout') }}"><i class="fas fa-sign-out-alt"></i></a>
-                                                </li>
+                                            <li>
+                                                <a href="{{ route('admin.dashboard') }}">@lang('navs.frontend.dashboard')</a>
+                                            </li>
+                                            <li>
+                                                <a href="{{ route('frontend.auth.logout') }}"><i class="fas fa-sign-out-alt"></i></a>
+                                            </li>
                                             @else
                                             <li class="menu-item-has-children ul-li-block">
                                                 <a href="#!">{{ $logged_in_user->name }}</a>
@@ -158,7 +170,6 @@
                                                         </li>
                                                     @endcan
 
-
                                                     <li>
                                                         <a href="{{ route('frontend.auth.logout') }}">@lang('navs.general.logout')</a>
                                                     </li>
@@ -166,54 +177,49 @@
                                             </li>
                                             @endif
                                         @else
-                                            <li class="log-in mt-0">
-                                                @if(!auth()->check())
+                                            <li>
+                                                <div class="log-in mt-0">
                                                     <a id="openLoginModal" data-target="#myModal"
                                                        href="#">@lang('navs.general.login')</a>
-                                                    <!-- The Modal -->
-                                                @endif
+                                                    {{--@include('frontend.layouts.modals.loginModal')--}}
+
+                                                </div>
                                             </li>
                                         @endif
-
                                             @if(count($locales) > 1)
-                                                <li class="menu-item-has-children ul-li-block">
-                                                    <a href="#">
+                                            <li class="menu-item-has-children ul-li-block">
+                                                <a href="#">
                                                     <span class="d-md-down-none">@lang('menus.language-picker.language')
                                                         ({{ strtoupper(app()->getLocale()) }})</span>
-                                                    </a>
-                                                    <ul class="sub-menu">
-                                                        @foreach($locales as $lang)
-                                                            @if($lang != app()->getLocale())
-                                                                <li>
-                                                                    <a href="{{ '/lang/'.$lang }}"
-                                                                       class=""> @lang('menus.language-picker.langs.'.$lang)</a>
-                                                                </li>
-                                                            @endif
-                                                        @endforeach
-                                                    </ul>
-                                                </li>
-                                            @endif
+                                                </a>
+                                                <ul class="sub-menu">
+                                                    @foreach($locales as $lang)
+                                                        @if($lang != app()->getLocale())
+                                                            <li>
+                                                                <a href="{{ '/lang/'.$lang }}"
+                                                                   class=""> @lang('menus.language-picker.langs.'.$lang)</a>
+                                                            </li>
+                                                        @endif
+                                                    @endforeach
+                                                </ul>
+                                            </li>
+                                        @endif
                                     </ul>
                                 </div>
                             </nav>
 
                             <div class="mobile-menu">
-                                <div class="logo"><a href="{{url('/')}}"><img
-                                                src={{asset("storage/logos/".config('logo_w_image'))}} alt="Logo"></a>
+                                <div class="logo">
+                                    <a href="{{url('/')}}">
+                                        <img src={{asset("storage/logos/".config('logo_w_image'))}} alt="Logo">
+                                    </a>
                                 </div>
                                 <nav>
                                     <ul>
                                         @if(count($custom_menus) > 0 )
                                             @foreach($custom_menus as $menu)
                                                 @if($menu['id'] == $menu['parent'])
-                                                    @if(count($menu->subs) == 0)
-                                                        <li class="">
-                                                            <a href="{{asset($menu->link)}}"
-                                                               class="nav-link {{ active_class(Active::checkRoute('frontend.user.dashboard')) }}"
-                                                               id="menu-{{$menu->id}}">{{trans('custom-menu.'.$menu_name.'.'.str_slug($menu->label))}}</a>
-                                                        </li>
-                                                    @else
-
+                                                    @if(count($menu->subs) > 0)
                                                         <li class="">
                                                             <a href="#!">{{trans('custom-menu.'.$menu_name.'.'.str_slug($menu->label))}}</a>
                                                             <ul class="">
@@ -222,18 +228,21 @@
                                                                 @endforeach
                                                             </ul>
                                                         </li>
+                                                     @else
+                                                        <li class="">
+                                                            <a href="{{asset($menu->link)}}"
+                                                               class="nav-link {{ active_class(Active::checkRoute('frontend.user.dashboard')) }}"
+                                                               id="menu-{{$menu->id}}">{{trans('custom-menu.'.$menu_name.'.'.str_slug($menu->label))}}</a>
+                                                        </li>
                                                     @endif
-
 
                                                 @endif
                                             @endforeach
                                         @endif
-
                                         @if(auth()->check())
                                             <li class="">
-                                                <a href="#!">{{ $logged_in_user->name }}</a>
+                                                <a href="#!">{{ $logged_in_user->name}}</a>
                                                 <ul class="">
-
                                                     @can('view backend')
                                                         <li>
                                                             <a href="{{ route('admin.dashboard') }}">@lang('navs.frontend.dashboard')</a>
@@ -247,15 +256,14 @@
                                                 </ul>
                                             </li>
                                         @else
-                                            <li class="">
-                                                <a id="openLoginModal" data-target="#myModal"
-                                                   href="#">@lang('navs.general.login')</a>
-                                                <!-- The Modal -->
-                                                {{--@include('frontend.layouts.modals.loginModal')--}}
-
+                                            <li>
+                                                <div class=" ">
+                                                    <a id="openLoginModal" data-target="#myModal"
+                                                       href="#">@lang('navs.general.login')</a>
+                                                    <!-- The Modal -->
+                                                </div>
                                             </li>
                                         @endif
-
                                             @if(count($locales) > 1)
                                                 <li class="menu-item-has-children ul-li-block">
                                                     <a href="#">
@@ -289,14 +297,16 @@
 
         @yield('content')
         @include('cookieConsent::index')
-        @if(!isset($no_footer))
-            @include('frontend.layouts.partials.footer')
-        @endif
+
+
+        @include('frontend.layouts.partials.footer')
 
     </div><!-- #app -->
 
     <!-- Scripts -->
+
     @stack('before-scripts')
+
     <!-- For Js Library -->
     <script src="{{asset('assets/js/jquery-2.1.4.min.js')}}"></script>
     <script src="{{asset('assets/js/popper.min.js')}}"></script>
@@ -311,8 +321,8 @@
     <script src="{{asset('assets/js/waypoints.min.js')}}"></script>
     <script src="{{asset('assets/js/jquery-ui.js')}}"></script>
     <script src="{{asset('assets/js/gmap3.min.js')}}"></script>
+
     <script src="{{asset('assets/js/switch.js')}}"></script>
-    <script src="{{asset('assets/js/script.js')}}"></script>
 
     <script>
         @if(request()->has('user')  && (request('user') == 'admin'))
@@ -335,6 +345,9 @@
 
         @endif
     </script>
+
+
+    <script src="{{asset('assets/js/script.js')}}"></script>
     <script>
         @if((session()->has('show_login')) && (session('show_login') == true))
         $('#myModal').modal('show');
@@ -342,11 +355,13 @@
         var font_color = "{{config('font_color')}}"
         setActiveStyleSheet(font_color);
     </script>
+
     @yield('js')
 
     @stack('after-scripts')
 
     @include('includes.partials.ga')
+
     @if(!empty(config('custom_js')))
         <script>
             {!! config('custom_js') !!}

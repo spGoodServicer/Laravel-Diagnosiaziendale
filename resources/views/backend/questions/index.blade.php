@@ -93,8 +93,7 @@ td img {
 
 <script>
 
-        console.log("");
-
+        
         jQuery(document).ready(function (e) {
            // QuestionEdit.init();
               $(function() {
@@ -194,8 +193,6 @@ td img {
                 },
                 initComplete: function(settings, json){
                     $( ".page_no" ).blur(function() {
-                        //console.log($(this).attr('id'));
-                        //console.log($(this.val());
                         $.ajax({
                             data: { "test_id":"<?php echo request('test_id') ?? '' ?>", "question_id":$(this).attr('id'), "page_no":$(this).val(),"_token": "{{ csrf_token() }}"},
                             url: 'questions/page-update',

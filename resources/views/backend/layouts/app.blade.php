@@ -30,7 +30,7 @@
             <link rel="stylesheet" type="{{asset('css/select2.css')}}"/>
             <!-- <link rel="stylesheet" href="{{asset('assets/css/fontawesome-all.css')}}"/> -->
             <link rel="stylesheet" href="//use.fontawesome.com/releases/v5.7.2/css/all.css"/>
-                <link rel="stylesheet" type="text/css" href="{{asset('assets/metronic_assets/global/plugins/jstree/dist/themes/default/style.min.css')}}"/>
+            <link rel="stylesheet" type="text/css" href="{{asset('plugins/DropdownTree/dropdowntree.css')}}"/>
 
             <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
 
@@ -79,6 +79,10 @@
         </head>
 
         <body class="{{ config('backend.body_classes') }}">
+        <!-- Preloader -->
+            <div class="preloader flex-column justify-content-center align-items-center">
+                <img class="navbar-brand-full" src="{{asset('storage/logos/'.config('logo_b_image'))}}"  height="25" alt="Square Logo">
+            </div>
         @include('backend.includes.header')
 
         <div class="app-body">
@@ -141,7 +145,7 @@
         
         <script type="text/javascript" src="{{asset('js/table-editable.js')}}"></script>
         
-        <script src="{{asset('assets/metronic_assets/global/plugins/jstree/dist/jstree.min.js')}}"></script>
+        <script src="{{asset('plugins/DropdownTree/dropdowntree.js')}}"></script>
 <!-- END PAGE LEVEL SCRIPTS -->
         <script src="{{asset('js/ui-tree.js')}}"></script>
          <script src="{{asset('js/ui-tree2.js')}}"></script>  
@@ -150,7 +154,17 @@
 
         <script>
             window._token = '{{ csrf_token() }}';
-        
+            $(function() {
+                setTimeout(function () {
+                    var $preloader = $('.preloader');
+                    if ($preloader) {
+                        $preloader.css('height', 0);
+                        setTimeout(function () {
+                            $preloader.children().hide();
+                        }, 200);
+                    }
+                }, 200);
+            });
         </script>
 
         @stack('after-scripts')

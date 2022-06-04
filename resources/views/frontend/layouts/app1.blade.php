@@ -196,7 +196,7 @@
                                                     @foreach($locales as $lang)
                                                         @if($lang != app()->getLocale())
                                                             <li>
-                                                                <a href="{{ '/lang/'.$lang }}"
+                                                                <a href="{{ url('lang/'.$lang) }}"
                                                                    class=""> @lang('menus.language-picker.langs.'.$lang)</a>
                                                             </li>
                                                         @endif

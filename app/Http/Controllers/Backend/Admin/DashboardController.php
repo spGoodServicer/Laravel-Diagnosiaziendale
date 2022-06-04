@@ -37,10 +37,10 @@ class DashboardController extends Controller
             $file_name_array = explode(".", $file_name);
             $extension = end($file_name_array);
             $new_image_name = $file_name_array[0].rand().'.'.$extension;
-            chmod('uploads/image/', 0777);
+            chmod('public/uploads/image/', 0777);
             $allowed_extention = array("jpg", "gif", "png");
             if(in_array($extension, $allowed_extention)){
-                move_uploaded_file($file, 'uploads/image/'.$new_image_name);
+                move_uploaded_file($file, 'public/uploads/image/'.$new_image_name);
                 $function_number = $_GET['CKEditorFuncNum'];
                 $url = $_SERVER['HTTP_ORIGIN'].'/uploads/image/'.$new_image_name;
                 $message = '';

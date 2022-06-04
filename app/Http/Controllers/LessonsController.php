@@ -650,23 +650,26 @@ class LessonsController extends Controller
 		}
 	//	$allquestions =DB::table('questions')->where('course_id',$lesson->course->id)->get();
 		
-		 
+		
 		$allquestions = $lesson->questions;
 		 
 		
 		$tmppagewithquestions = [];
-		foreach($allquestions as $ques)
+        if(isset($lesson->questions))
 		{
-			$ques = (object) $ques;
-			if(isset($tmppagewithquestions[$ques->page_number]))
-			{
-				array_push($tmppagewithquestions[$ques->page_number],$ques);
-			}
-			else
-			{
-				$tmppagewithquestions[$ques->page_number] = [$ques];
-			}
-		} 
+            foreach($allquestions as $ques)
+            {
+                $ques = (object) $ques;
+                if(isset($tmppagewithquestions[$ques->page_number]))
+                {
+                    array_push($tmppagewithquestions[$ques->page_number],$ques);
+                }
+                else
+                {
+                    $tmppagewithquestions[$ques->page_number] = [$ques];
+                }
+            } 
+        }
 		$pagewithquestions = [];
 		foreach($tmppagewithquestions as $key=>$tmparr)
 		{
